@@ -1,0 +1,15 @@
+{
+  "name": "Web cal",
+  "namespace": "uzgent\\WebCalClass",
+  "description": "",
+  "authors": [
+    {
+      "name": "Lieven Vaneeckhaute",
+      "email": "lieven.vaneeckhaute@uzgent.be",
+      "institution": "University Hospital Ghent"
+    }
+  ],
+  "documentation" : "howto.html",
+  "permissions": []
+
+}
