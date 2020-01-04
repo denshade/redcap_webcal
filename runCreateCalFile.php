@@ -6,7 +6,8 @@ require_once "vendor/autoload.php";
 global $conn;
 $c = new CreateCalFile();
 try{
-    echo $c->generate(15);
+
+    echo $c->writeCalendar(15,".ics");
 
 } catch(Exception $exception)
 {

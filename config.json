@@ -10,6 +10,14 @@
     }
   ],
   "documentation" : "howto.html",
-  "permissions": []
-
+  "permissions": [],
+  "crons": [
+    {
+      "cron_name": "generated",
+      "cron_description": "Cron that runs daily to generate the calendar",
+      "method": "createCalendar",
+      "cron_frequency": "86400",
+      "cron_max_run_time": "1200"
+    }
+  ]
 }
