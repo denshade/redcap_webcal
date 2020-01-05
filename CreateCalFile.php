@@ -42,7 +42,7 @@ class CreateCalFile
     {
         $sql = "select * from redcap_events_metadata m right outer join redcap_events_calendar c on c.event_id = m.event_id
 			where c.project_id = " . $projectId ." order by c.event_date, c.event_time";
-        $query_result = db_query($sql);
+        $query_result = db_query($sql); //TODO use prepared statement...
         $infos = [];
         while ($info = db_fetch_assoc($query_result))
         {
