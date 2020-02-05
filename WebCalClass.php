@@ -13,8 +13,8 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
      */
     public function createCalendar()
     {
-        $webcaldir = $this->createWebcalDirectoryIfNeeded();
         try {
+            $webcaldir = $this->createWebcalDirectoryIfNeeded();
             $calFileGenerator = new \CreateCalFile();
             foreach ($this->getActiveProjects() as $activeProject)
             {
@@ -67,12 +67,12 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
     }
 
     /**
-     * @param $activeProject
-     * @param \CreateCalFile $calFileGenerator
-     * @param $webcaldir
+     * @param $activeProject int project id.
+     * @param \CreateCalFile $calFileGenerator Never null.
+     * @param $webcaldir string directory where to generate the files
      * @throws \Exception
      */
-    public function createCalendarForProject($activeProject, \CreateCalFile $calFileGenerator, $webcaldir)
+    private function createCalendarForProject($activeProject, \CreateCalFile $calFileGenerator, $webcaldir)
     {
         $salt = $this->getProjectSetting("salt", $activeProject);
         if ($salt !== null && strlen($salt) > 0) {
