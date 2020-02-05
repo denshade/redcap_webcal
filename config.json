@@ -1,7 +1,7 @@
 {
   "name": "Web cal",
   "namespace": "uzgent\\WebCalClass",
-  "description": "",
+  "description": "This module allows you to share calendar records.",
   "authors": [
     {
       "name": "Lieven Vaneeckhaute",
@@ -11,13 +11,33 @@
   ],
   "documentation" : "howto.html",
   "permissions": [],
+  "no-auth-pages": [
+    "showDoc"
+  ],
   "crons": [
     {
       "cron_name": "generated",
       "cron_description": "Cron that runs daily to generate the calendar",
       "method": "createCalendar",
-      "cron_frequency": "86400",
+      "cron_frequency": "1",
       "cron_max_run_time": "1200"
     }
-  ]
+  ],
+  "project-settings": [{
+    "key": "salt",
+    "name": "The project specific salt",
+    "required" : true,
+    "type": "text"
+  }],
+  "links": {
+    "project": [
+      {
+        "name": "Share agenda",
+        "icon": "fas fa-receipt",
+        "url": "createLink.php",
+        "show-header-and-footer": true
+      }
+    ]
+  }
+
 }
