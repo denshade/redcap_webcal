@@ -13,25 +13,12 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
      */
     public function createCalendar()
     {
-        $webcaldir = $this->getWebcalendarDirectory();
-        if (!file_exists($webcaldir))
-        {
-            $success = mkdir($webcaldir);
-            if (!$success){
-                throw new \Exception("Cannot create webcalendar directory");
-            }
-        }
+        $webcaldir = $this->createWebcalDirectoryIfNeeded();
         try {
             $calFileGenerator = new \CreateCalFile();
             foreach ($this->getActiveProjects() as $activeProject)
             {
-                $salt = $this->getProjectSetting("salt", $activeProject);
-                if ($salt === null || strlen($salt) === 0)
-                {
-                    continue; //Skip projects without a salt.
-                }
-                $filename = $this->getFilename($activeProject, $salt);
-                $calFileGenerator->writeCalendar($activeProject, $webcaldir . DIRECTORY_SEPARATOR . $filename);
+                $this->createCalendarForProject($activeProject, $calFileGenerator, $webcaldir);
             }
         } catch (\Exception $e)
         {
@@ -64,7 +51,7 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
     /**
      * @param $activeProject int project id.
      * @param $salt string can potentially overwrite files on the server! Must be properly checked.
-     * @return string
+     * @return string, never null.
      */
     public function getFilename($activeProject, $salt)
     {
@@ -77,6 +64,38 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
             throw new \RuntimeException("Invalid salt, no directory traversal allowed:  $salt");
         }
         return "P" . $activeProject . "ID" . $salt . ".ics";
+    }
+
+    /**
+     * @param $activeProject
+     * @param \CreateCalFile $calFileGenerator
+     * @param $webcaldir
+     * @throws \Exception
+     */
+    public function createCalendarForProject($activeProject, \CreateCalFile $calFileGenerator, $webcaldir)
+    {
+        $salt = $this->getProjectSetting("salt", $activeProject);
+        if ($salt !== null && strlen($salt) > 0) {
+            $filename = $this->getFilename($activeProject, $salt);
+            $calFileGenerator->writeCalendar($activeProject, $webcaldir . DIRECTORY_SEPARATOR . $filename);
+        }
+        //If no salt then skip.
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function createWebcalDirectoryIfNeeded()
+    {
+        $webcaldir = $this->getWebcalendarDirectory();
+        if (!file_exists($webcaldir)) {
+            $success = mkdir($webcaldir);
+            if (!$success) {
+                throw new \Exception("Cannot create webcalendar directory");
+            }
+        }
+        return $webcaldir;
     }
 
 

@@ -32,15 +32,22 @@ class CreateCalFile
      */
     public function writeCalendar($projectId, $filename)
     {
-        file_put_contents($filename, $this->generate($projectId));
+        $success = file_put_contents($filename, $this->generate($projectId));
+        if (!$success) {
+            throw new Exception("Unable to write file to " . $filename);
+        }
     }
 
     /**
      * @param $projectId
      * @return array
+     * @throws Exception
      */
     public function getCalEvents($projectId)
     {
+        if ($projectId === null || !is_numeric($projectId)) {
+            throw new Exception("Invalid project id " . $projectId);
+        }
         $sql = "select * from redcap_events_metadata m right outer join redcap_events_calendar c on c.event_id = m.event_id
 			where c.project_id = " . $projectId ." order by c.event_date, c.event_time";
         $query_result = db_query($sql); //TODO use prepared statement...
@@ -57,7 +64,7 @@ class CreateCalFile
      * @return \Eluceo\iCal\Component\Event
      * @throws Exception
      */
-    public function createEventFromRecord($event)
+    private function createEventFromRecord($event)
     {
         $vEvent = new \Eluceo\iCal\Component\Event();
         if ($event["record"] !== null) {
