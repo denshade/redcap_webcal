@@ -53,7 +53,7 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
      * @param $salt string can potentially overwrite files on the server! Must be properly checked.
      * @return string, never null.
      */
-    public function getFilename($activeProject, $salt)
+    public static function getFilename($activeProject, $salt)
     {
         if (!is_numeric($activeProject))
         {

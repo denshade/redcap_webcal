@@ -9,7 +9,7 @@ $assetId = $_GET["id"];
 global $conn;
 global $module;
 /**
-* @var $module \ExternalModules\AbstractExternalModule
+* @var $module \uzgent\WebCalClass\WebCalClass
 */
 $salt = $module->getProjectSetting("salt");
 
@@ -26,8 +26,9 @@ $salt = $module->getProjectSetting("salt");
 exit(0);
 }
 
+$filename = $module->getFilename($projectId, $salt);
 //$postUrl = $this->;// $module->getUrl("showDoc.php", true, true);//TRIED THIS FOR 4 HOURS AND GAVE UP. _SOMETHING_ WRONG WITH THE API PARAMETERS.
-    $url = "webcal://$_SERVER[HTTP_HOST]".APP_PATH_WEBROOT_PARENT."/webcalendar/P".$projectId."ID".$salt.".ics";
+    $url = "webcal://$_SERVER[HTTP_HOST]".APP_PATH_WEBROOT_PARENT."/webcalendar/".$filename;
 
 ?>
 Copy this link to your outlook:
