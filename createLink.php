@@ -52,7 +52,7 @@ function printShowPublicURL($url, $dagRecord)
 <?php
 exit(0);
 }
-    $dags = $module->getDags($projectId);
+    $dags = $module->getDagForUser($projectId, USERID);
 
     if (count($dags) > 0)
     {

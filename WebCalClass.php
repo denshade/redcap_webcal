@@ -167,5 +167,31 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
         return $dags;
     }
 
+    /**
+     * @param $activeProject
+     * @return array|null
+     * @throws \Exception
+     */
+    public function getDagForUser($activeProject, $userid)
+    {
+        $userrights = \UserRights::getPrivileges($activeProject, $userid);
+        $value = $userrights[$activeProject][$userid];
+        $group_id = $value["group_id"];
+        $dags = $this->getDags($activeProject);
+        if ($group_id === null)
+        {
+            return $dags;
+        } else {
+            foreach($dags as $dag)
+            {
+                if ($dag["group_id"] == $group_id) //return the dag that matches the group.
+                {
+                    return [$dag];
+                }
+            }
+        }
+        return [];
+    }
+
 
 }
