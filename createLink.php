@@ -13,6 +13,33 @@ global $module;
 */
 $salt = $module->getProjectSetting("salt");
 
+function printShowPublicURL($url, $dagRecord)
+{
+    ?>
+    Copy this link to your agenda software:
+    <div class="card text-white bg-info mb-3">
+        <div class="card-header">
+            <?php
+
+            if ($dagRecord === null)
+            {
+                echo "Public URL ";
+            } else {
+                echo "Public URL for DAG ". $dagRecord["group_name"];
+            }
+            ?>
+
+        </div>
+        <div class="card-body">
+            <input class="form-control" type="text" id="myInput" value="<?php echo $url; ?>">
+
+            <!-- The button used to copy the text -->
+            <button class="form-control" onclick="myFunction()">Copy to Clipboard</button>
+        </div>
+    </div>
+    <?php
+}
+
 ?>
 <h1 class="h1">Link to the REDCap webcalendar.</h1>
 <p>
@@ -25,24 +52,23 @@ $salt = $module->getProjectSetting("salt");
 <?php
 exit(0);
 }
+    $dags = $module->getDags($projectId);
 
-$filename = $module->getFilename($projectId, $salt);
+    if (count($dags) > 0)
+    {
+        foreach ($dags as $dagRecord)
+        {
+            $filename = $module->getFilename($projectId, $salt, $dagRecord["group_id"]);
+            $url = "webcal://$_SERVER[HTTP_HOST]" . APP_PATH_WEBROOT_PARENT . "/webcalendar/" . $filename;
+            printShowPublicURL($url, $dagRecord);
+        }
+    } else {
+        $filename = $module->getFilename($projectId, $salt);
 //$postUrl = $this->;// $module->getUrl("showDoc.php", true, true);//TRIED THIS FOR 4 HOURS AND GAVE UP. _SOMETHING_ WRONG WITH THE API PARAMETERS.
-    $url = "webcal://$_SERVER[HTTP_HOST]".APP_PATH_WEBROOT_PARENT."/webcalendar/".$filename;
-
+        $url = "webcal://$_SERVER[HTTP_HOST]" . APP_PATH_WEBROOT_PARENT . "/webcalendar/" . $filename;
+        printShowPublicURL($url, null);
+    }
 ?>
-Copy this link to your outlook:
-<div class="card text-white bg-info mb-3">
-    <div class="card-header">
-        Public URL
-    </div>
-    <div class="card-body">
-        <input class="form-control" type="text"  id="myInput" value="<?php echo $url; ?>">
-
-        <!-- The button used to copy the text -->
-        <button class="form-control" onclick="myFunction()">Copy to Clipboard</button>
-    </div>
-</div>
 
 <BR/>
 

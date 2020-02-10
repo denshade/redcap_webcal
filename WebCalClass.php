@@ -4,6 +4,8 @@ namespace uzgent\WebCalClass;
 
 
 
+use mysql_xdevapi\Exception;
+
 require_once "CreateCalFile.php";
 // Declare your module class, which must extend AbstractExternalModule
 class WebCalClass extends \ExternalModules\AbstractExternalModule {
@@ -34,10 +36,19 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
      */
     private function getActiveProjects()
     {
-        $result = db_query("SELECT project_id FROM `redcap_external_module_settings` INNER JOIN 
+        global $rc_connection;
+        $projectIds  = [];
+        $sql = "SELECT project_id FROM `redcap_external_module_settings` INNER JOIN 
  `redcap_external_modules` ON redcap_external_modules.external_module_id = redcap_external_module_settings.external_module_id
- WHERE `key` = 'enabled' and directory_prefix = 'webcal'");
-        return db_fetch_array($result,MYSQLI_NUM);
+ WHERE `key` = 'enabled' and directory_prefix = 'webcal'";
+        $dagQuery = mysqli_query($rc_connection, $sql);
+        $dagResult = mysqli_fetch_assoc($dagQuery);
+        while ($dagResult !== null) {
+            $projectIds []= $dagResult["project_id"];
+            $dagResult = mysqli_fetch_assoc($dagQuery);
+        }
+        mysqli_free_result($dagResult);
+        return $projectIds;
     }
 
     /**
@@ -51,9 +62,10 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
     /**
      * @param $activeProject int project id.
      * @param $salt string can potentially overwrite files on the server! Must be properly checked.
+     * @param $dag int Id of the DAG. Use this for multiDAG projects.
      * @return string, never null.
      */
-    public static function getFilename($activeProject, $salt)
+    public static function getFilename($activeProject, $salt, $dag = null)
     {
         if (!is_numeric($activeProject))
         {
@@ -63,7 +75,12 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
         {
             throw new \RuntimeException("Invalid salt, no directory traversal allowed:  $salt");
         }
-        return "P" . $activeProject . "ID" . $salt . ".ics";
+        $dagPrefix = "";
+        if ($dag !== null)
+        {
+            $dagPrefix = substr(md5($dag.$salt),0,5);
+        }
+        return "P" . $activeProject . "ID" . $dagPrefix . $salt . ".ics";
     }
 
     /**
@@ -74,10 +91,22 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
      */
     private function createCalendarForProject($activeProject, \CreateCalFile $calFileGenerator, $webcaldir)
     {
-        $salt = $this->getProjectSetting("salt", $activeProject);
+
+        $salt = $this->getProjectSetting("salt", (int)$activeProject);
+
         if ($salt !== null && strlen($salt) > 0) {
-            $filename = $this->getFilename($activeProject, $salt);
-            $calFileGenerator->writeCalendar($activeProject, $webcaldir . DIRECTORY_SEPARATOR . $filename);
+            if (count($this->getDagIds($activeProject))> 0){
+
+                foreach ($this->getDagIds($activeProject) as $dagId)
+                {
+                    $filename = $this->getFilename($activeProject, $salt, $dagId);
+                    $calFileGenerator->writeCalendar($activeProject, $webcaldir . DIRECTORY_SEPARATOR . $filename, $dagId);
+                }
+            } else {
+                $filename = $this->getFilename($activeProject, $salt);
+                $calFileGenerator->writeCalendar($activeProject, $webcaldir . DIRECTORY_SEPARATOR . $filename);
+            }
+
         }
         //If no salt then skip.
     }
@@ -96,6 +125,46 @@ class WebCalClass extends \ExternalModules\AbstractExternalModule {
             }
         }
         return $webcaldir;
+    }
+
+    /**
+     * @param $activeProject
+     * @return array|null
+     * @throws \Exception
+     */
+    public function getDagIds($activeProject)
+    {
+        if (!is_numeric($activeProject))
+        {
+            throw new \Exception("project id must be numeric");
+        }
+        $dags = $this->getDags($activeProject);
+        $dagIds = [];
+        foreach ($dags as $dag)
+        {
+            $dagIds []= $dag["group_id"];
+        }
+        return $dagIds;
+    }
+
+    /**
+     * @param $activeProject
+     * @return array|null
+     * @throws \Exception
+     */
+    public function getDags($activeProject)
+    {
+        global $rc_connection;
+        $dags  = [];
+        $sql = "SELECT * FROM `redcap_data_access_groups` WHERE project_id = ". $activeProject;
+        $dagQuery = mysqli_query($rc_connection, $sql);
+        $dagResult = mysqli_fetch_assoc($dagQuery);
+        while ($dagResult !== null) {
+            $dags []= $dagResult;
+            $dagResult = mysqli_fetch_assoc($dagQuery);
+        }
+        mysqli_free_result($dagResult);
+        return $dags;
     }
 
 

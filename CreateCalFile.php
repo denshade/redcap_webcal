@@ -9,13 +9,13 @@ class CreateCalFile
      * @return string
      * @throws Exception
      */
-    public function generate($projectId)
+    public function generate($projectId, $dagId = null)
     {
         if ($projectId === null || !is_numeric($projectId)) {
             throw new Exception("Invalid project id " . $projectId);
         }
         //Select the data from the database.
-        $events = $this->getCalEvents($projectId);
+        $events = $this->getCalEvents($projectId, $dagId);
         $vCalendar = new \Eluceo\iCal\Component\Calendar($projectId);
         foreach($events as $event)
         {
@@ -30,9 +30,9 @@ class CreateCalFile
      * @param $filename
      * @throws Exception
      */
-    public function writeCalendar($projectId, $filename)
+    public function writeCalendar($projectId, $filename, $dagId = null)
     {
-        $success = file_put_contents($filename, $this->generate($projectId));
+        $success = file_put_contents($filename, $this->generate($projectId, $dagId));
         if (!$success) {
             throw new Exception("Unable to write file to " . $filename);
         }
@@ -43,13 +43,18 @@ class CreateCalFile
      * @return array
      * @throws Exception
      */
-    public function getCalEvents($projectId)
+    public function getCalEvents($projectId, $dagId = null)
     {
         if ($projectId === null || !is_numeric($projectId)) {
             throw new Exception("Invalid project id " . $projectId);
         }
-        $sql = "select * from redcap_events_metadata m right outer join redcap_events_calendar c on c.event_id = m.event_id
+        if ($dagId == null){
+            $sql = "select * from redcap_events_metadata m right outer join redcap_events_calendar c on c.event_id = m.event_id
 			where c.project_id = " . $projectId ." order by c.event_date, c.event_time";
+        } else {
+            $sql = "select * from redcap_events_metadata m right outer join redcap_events_calendar c on c.event_id = m.event_id
+			where c.project_id = " . $projectId ." and group_id = ".$dagId." order by c.event_date, c.event_time";
+        }
         $query_result = db_query($sql); //TODO use prepared statement...
         $infos = [];
         while ($info = db_fetch_assoc($query_result))
