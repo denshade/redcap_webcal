@@ -20,7 +20,7 @@ function printShowPublicURL($url, $dagRecord)
     <div class="card text-white bg-info mb-3">
         <div class="card-header">
             <?php
-
+            $groupId = $dagRecord["group_id"];
             if ($dagRecord === null)
             {
                 echo "Public URL ";
@@ -31,10 +31,10 @@ function printShowPublicURL($url, $dagRecord)
 
         </div>
         <div class="card-body">
-            <input class="form-control" type="text" id="myInput" value="<?php echo $url; ?>">
+            <input class="form-control" type="text" id="myInput<?php echo $groupId;?>" value="<?php echo $url; ?>">
 
             <!-- The button used to copy the text -->
-            <button class="form-control" onclick="myFunction()">Copy to Clipboard</button>
+            <button class="form-control" onclick="myFunction('myInput<?php echo $groupId;?>')">Copy to Clipboard</button>
         </div>
     </div>
     <?php
@@ -78,9 +78,9 @@ exit(0);
 
 
 <script>
-    function myFunction() {
+    function myFunction(idName) {
         /* Get the text field */
-        var copyText = document.getElementById("myInput");
+        var copyText = document.getElementById(idName);
 
         /* Select the text field */
         copyText.select();

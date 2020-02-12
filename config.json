@@ -1,6 +1,7 @@
 {
   "name": "Web cal",
   "namespace": "uzgent\\WebCalClass",
+  "framework-version": 3,
   "description": "This module allows you to share calendar records.",
   "authors": [
     {
@@ -32,10 +33,10 @@
   "links": {
     "project": [
       {
-        "name": "Share agenda",
-        "icon": "fas fa-receipt",
-        "url": "createLink.php",
-        "show-header-and-footer": true
+        "name" : "Share agenda",
+        "icon" : "far fa-calendar-alt",
+        "url" : "createLink.php",
+        "show-header-and-footer" : true
       }
     ]
   }
